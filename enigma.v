@@ -19,7 +19,7 @@ module enigma(char_out, char_in, position_1, position_2, position_3);
 		if(char_in != 5'b11111) 
 			begin
 				positions[0] = (positions[0] + 1) % 26;	
-				if(positions[0]	== 5'b01001) positions[1] = (positions[1] + 1) % 26;
+				if(positions[0]	== 5'b10001) positions[1] = (positions[1] + 1) % 26;
 				if(positions[1] == 5'b00110) positions[2] = (positions[2] + 1) % 26;
 			end	
 		
@@ -225,33 +225,7 @@ module wheel_type_III(char_out1, char_out2, char_in1, char_in2, position_in);
 	Entry = ABCDEFGHIJKLMNOPQRSTUVWXYZ (rotor right side)   
 	        ||||||||||||||||||||||||||
 	III   = B D F H J L C P R T X V Z N Y E I W G A K M U S Q O
-	1
-	3
-	5
-	7
-	9
-	11
-	2
-	15
-	17
-	19
-	23
-	21
-	25
-	13
-	24
-	4
-	8
-	22
-	6
-	0
-	10
-	12
-	20
-	18
-	16
-	14
-*/
+	*/
 	wire [4:0] out [25:0];
 	/*a*/ assign out[0] = 1;
 	/*b*/ assign out[1] = 3;
