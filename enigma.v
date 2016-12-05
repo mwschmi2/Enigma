@@ -2,25 +2,31 @@
 module enigma(char_out, char_in, position_1, position_2, position_3);
 	output[4:0] char_out;
 	input[4:0] char_in, position_1, position_2, position_3;
-	reg [4:0] positions [2:0];
+	reg [4:0] position_I, position_II, position_III;
 	//set rotor position starts
-	initial positions[0] = position_1;
-	initial positions[1] = position_2;
-	initial positions[2] = position_3;
+	initial position_I = position_1;
+	initial position_II = position_2;
+	initial position_III = position_3;
 
 	wire[4:0] out_wheel_I, out_wheel_II, out_wheel_III, out_wheel_III_2, out_wheel_II_2, reflector_out;
 
-	wheel_type_I wheel_I(out_wheel_I, char_out, char_in, out_wheel_II_2, positions[0]);
-	wheel_type_II wheel_II(out_wheel_II, out_wheel_II_2, out_wheel_I,out_wheel_III_2, positions[1]);
-	wheel_type_III wheel_III(out_wheel_III, out_wheel_III_2, out_wheel_II, reflector_out, positions[2]);
+	wheel_type_I wheel_I(out_wheel_I, char_out, char_in, out_wheel_II_2, position_I);
+
+	wheel_type_II wheel_II(out_wheel_II, out_wheel_II_2, out_wheel_I,out_wheel_III_2, position_II);
+	wheel_type_III wheel_III(out_wheel_III, out_wheel_III_2, out_wheel_II, reflector_out, position_III);
 	reflector reflect(reflector_out, out_wheel_III);
+	/*
+	wire[4:0] out_wheel_I, reflector_out;
+	wheel_type_I wheel_I(out_wheel_I, char_out, char_in, reflector_out, position_I);
+	reflector reflect(reflector_out, out_wheel_I);
+	*/
 	
-	always @(posedge char_in) begin
+	always @(char_in) begin
 		if(char_in != 5'b11111) 
 			begin
-				positions[0] = (positions[0] + 1) % 26;	
-				if(positions[0]	== 5'b10001) positions[1] = (positions[1] + 1) % 26;
-				if(positions[1] == 5'b00110) positions[2] = (positions[2] + 1) % 26;
+				position_I = (position_I + 1) % 26;	
+				if(position_I	== 5'b10001) position_II = (position_II + 1) % 26;
+				if(position_II == 5'b00110) position_III = (position_III + 1) % 26;
 			end	
 		
 	end
@@ -67,6 +73,7 @@ Reflector B = YRUHQSLDPXNGOKMIEBFZCWVJAT
 	assign out[23] = 9;
 	assign out[24] = 0;
 	assign out[25] = 19;
+
 	
 	assign char_out = out[char_in];
 
@@ -74,6 +81,8 @@ endmodule //reflector
 module wheel_type_I(char_out1, char_out2, char_in1, char_in2, position_in);
 	output[4:0] char_out1, char_out2;
 	input[4:0] char_in1, char_in2, position_in;
+	integer i;
+
 	
 	//wehrmacht rotor I
 /*Entry = ABCDEFGHIJKLMNOPQRSTUVWXYZ (rotor right side)   
@@ -109,43 +118,24 @@ module wheel_type_I(char_out1, char_out2, char_in1, char_in2, position_in);
 	assign out[24] = 2;
 	assign out[25] = 9;
 
-	wire [4:0] reverse [25:0];
-	assign reverse[0] = 20; 
-	assign reverse[1] = 22; 
-	assign reverse[2] = 24;
-	assign reverse[3] = 6;
-	assign reverse[4] = 0;
-	assign reverse[5] = 3;
-	assign reverse[6] = 5;
-	assign reverse[7] = 15;
-	assign reverse[8] = 21;
-	assign reverse[9] = 25;
-	assign reverse[10] = 1;
-	assign reverse[11] = 4;
-	assign reverse[12] = 2;
-	assign reverse[13] = 10;
-	assign reverse[14] = 12;
-	assign reverse[15] = 19;
-	assign reverse[16] = 7;
-	assign reverse[17] = 23;
-	assign reverse[18] = 18;
-	assign reverse[19] = 11;
-	assign reverse[20] = 17;
-	assign reverse[21] = 8;
-	assign reverse[22] = 13;
-	assign reverse[23] = 16;
-	assign reverse[24] = 14;
-	assign reverse[25] = 9;
+	function [4:0] reverse;
+		input [4:0] char;
+		for(i = 0; i <= 25; i = i + 1) begin
+			if(out[i] == char) begin
+				reverse = (i + position_in) % 26;
+			end
+		end
+	endfunction
 
-
-	assign char_out1 = out[(char_in1 + position_in) % 26 ];
-	assign char_out2 = reverse[(char_in1 - position_in) % 26];
+	assign char_out1 = out[(char_in1 - position_in) % 26 ];
+	assign char_out2 = reverse(char_in2);
 
 
 endmodule //wheel
 module wheel_type_II(char_out1, char_out2, char_in1, char_in2, position_in);
 	output[4:0] char_out1, char_out2;
 	input[4:0] char_in1, char_in2, position_in;
+	integer i;
 /*
 	Entry = A B C D E F G H I J K L M N O P Q R S T U V W X Y Z   
 	        | | | | | | | | | | | | | | | | | | | | | | | | | |
@@ -184,37 +174,16 @@ module wheel_type_II(char_out1, char_out2, char_in1, char_in2, position_in);
 	Entry = A B C D E F G H I J K L M N O P Q R S T U V W X Y Z   
 	*/
 	
-	wire [4:0] reverse [25:0];
-	/*a*/ assign reverse[0] = 0;
-	/*b*/ assign reverse[1] = 9;  
-	/*c*/ assign reverse[2] = 15;
-	/*d*/ assign reverse[3] = 2; 
-	/*e*/ assign reverse[4] = 25; 
-	/*f*/ assign reverse[5] = 22;
-	/*g*/ assign reverse[6] = 17;
-	/*h*/ assign reverse[7] = 11;
-	/*i*/ assign reverse[8] = 5;
-	/*j*/ assign reverse[9] = 1;
-	/*k*/ assign reverse[10] = 3;
-	/*l*/ assign reverse[11] = 10; 
-	/*m*/ assign reverse[12] = 14;
-	/*n*/ assign reverse[13] = 19;
-	/*o*/ assign reverse[14] = 24;
-	/*p*/ assign reverse[15] = 20;
-	/*q*/ assign reverse[16] = 16;
-	/*r*/ assign reverse[17] = 6;
-	/*s*/ assign reverse[18] = 4;
-	/*t*/ assign reverse[19] = 13;
-	/*u*/ assign reverse[20] = 7;
-	/*v*/ assign reverse[21] = 23;
-	/*w*/ assign reverse[22] = 12;
-	/*x*/ assign reverse[23] = 8;
-	/*y*/ assign reverse[24] = 21;
-	/*z*/ assign reverse[25] = 18;
-
-
-	assign char_out1 = out[(char_in1 + position_in) % 26 ];
-	assign char_out2 = reverse[(char_in1 - position_in) % 26];
+	function [4:0] reverse;
+		input [4:0] char;
+		for(i = 0; i <= 25; i = i + 1) begin
+			if(out[i] == char) begin
+				reverse = (i + position_in) % 26;
+			end
+		end
+	endfunction
+	assign char_out1 = out[(char_in1 - position_in) % 26 ];
+	assign char_out2 = reverse(char_in2);
 
 
 endmodule
@@ -226,6 +195,7 @@ module wheel_type_III(char_out1, char_out2, char_in1, char_in2, position_in);
 	        ||||||||||||||||||||||||||
 	III   = B D F H J L C P R T X V Z N Y E I W G A K M U S Q O
 	*/
+	integer i;
 	wire [4:0] out [25:0];
 	/*a*/ assign out[0] = 1;
 	/*b*/ assign out[1] = 3;
@@ -254,36 +224,16 @@ module wheel_type_III(char_out1, char_out2, char_in1, char_in2, position_in);
 	/*y*/ assign out[24] = 16;
 	/*z*/ assign out[25] = 14;
 
-	wire [4:0] reverse [25:0];
-	/*a*/ assign reverse[1] = 0;
-	/*b*/ assign reverse[3] = 1;
-	/*c*/ assign reverse[5] = 2;
-	/*d*/ assign reverse[7] = 3;
-	/*e*/ assign reverse[9] = 4;
-	/*f*/ assign reverse[11] = 5;
-	/*g*/ assign reverse[2] = 6;
-	/*h*/ assign reverse[15] = 7;
-	/*i*/ assign reverse[17] = 8;
-	/*j*/ assign reverse[19] = 9;
-	/*k*/ assign reverse[23] = 10;
-	/*l*/ assign reverse[21] = 11;
-	/*m*/ assign reverse[25] = 12;
-	/*n*/ assign reverse[13] = 13;
-	/*o*/ assign reverse[24] = 14;
-	/*p*/ assign reverse[4] = 15;
-	/*q*/ assign reverse[8] = 16;
-	/*r*/ assign reverse[22] = 17;
-	/*s*/ assign reverse[6] = 18;
-	/*t*/ assign reverse[0] = 19;
-	/*u*/ assign reverse[10] = 20;
-	/*v*/ assign reverse[12] = 21;
-	/*w*/ assign reverse[20] = 22;
-	/*x*/ assign reverse[18] = 23;
-	/*y*/ assign reverse[16] = 24;
-	/*z*/ assign reverse[14] = 25;
 
-	assign char_out1 = out[(char_in1 + position_in) % 26 ];
-	assign char_out2 = reverse[(char_in1 - position_in) % 26];
-
+	function [4:0] reverse;
+		input [4:0] char;
+		for(i = 0; i <= 25; i = i + 1) begin
+			if(out[i] == char) begin
+				reverse = (i + position_in) % 26;
+			end
+		end
+	endfunction
+	assign char_out1 = out[(char_in1 - position_in) % 26 ];
+	assign char_out2 = reverse(char_in2);
 
 endmodule
