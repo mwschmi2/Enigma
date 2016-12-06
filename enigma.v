@@ -126,8 +126,9 @@ module wheel_type_I(char_out1, char_out2, char_in1, char_in2, position_in);
 			end
 		end
 	endfunction
-
-	assign char_out1 = out[(char_in1 - position_in) % 26 ];
+	wire signed [5:0] offset = (char_in1 - position_in);
+	wire [4:0] position = offset[5] ? 26 + offset : offset;
+	assign char_out1 = out[position];
 	assign char_out2 = reverse(char_in2);
 
 
@@ -182,7 +183,9 @@ module wheel_type_II(char_out1, char_out2, char_in1, char_in2, position_in);
 			end
 		end
 	endfunction
-	assign char_out1 = out[(char_in1 - position_in) % 26 ];
+	wire signed [5:0] offset = (char_in1 - position_in);
+	wire [4:0] position = offset[5] ? 26 + offset : offset;
+	assign char_out1 = out[position];
 	assign char_out2 = reverse(char_in2);
 
 
@@ -233,7 +236,9 @@ module wheel_type_III(char_out1, char_out2, char_in1, char_in2, position_in);
 			end
 		end
 	endfunction
-	assign char_out1 = out[(char_in1 - position_in) % 26 ];
+	wire signed [5:0] offset = (char_in1 - position_in);
+	wire [4:0] position = offset[5] ? 26 + offset : offset;
+	assign char_out1 = out[position];
 	assign char_out2 = reverse(char_in2);
 
 endmodule
